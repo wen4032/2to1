@@ -1,0 +1,1 @@
+window.WB_CLOUD_CONF={endpoint:"https://wensmile-score.app.workbuddy.host",oauthRelayBaseUrl:"https://www.workbuddy.cn/v2/as/genie-baas/oauth",publishableKey:"wbpk_uQniz5ZFkbwqEajOn2Jvdy_5Iv7aFiChb9v1OLABsJPR3SLSQRR1K4d"};

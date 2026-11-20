@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#F7F9FC">
+<title>温笑体测记分</title>
+<link rel="manifest" href="manifest.json?sharecode=CHZSSC6P7N">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?sharecode=CHZSSC6P7N">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="温笑体测">
+<link rel="preload" as="image" href="splash.jpg?sharecode=CHZSSC6P7N">
+<style>
+#splash{position:fixed;top:0;right:0;bottom:0;left:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:#1E40AF;opacity:1;transition:opacity .3s ease}
+#splash.out{opacity:0;pointer-events:none}
+#splash .sp-in{width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center}
+#splash img{width:100%;height:auto;display:block;border-radius:14px;background:#16368F}
+#splash .sp-school{margin:20px 0 8px;font-size:13px;letter-spacing:.16em;color:#C7D2FE}
+#splash .sp-hi{margin:0;font-size:22px;line-height:1.45;font-weight:700;color:#FFFFFF;text-align:center}
+#splash .sp-skip{position:absolute;bottom:28px;font-size:12px;color:#C0CEEF}
+html.no-splash #splash{display:none!important}
+</style>
+<script>try{var force=location.search.indexOf('splash=1')>-1;if(!force&&localStorage.getItem('pe_splash_day')===new Date().toDateString()){document.documentElement.className+=' no-splash';}}catch(e){}</script>
+<link rel="stylesheet" href="styles.css?v=110&sharecode=CHZSSC6P7N">
+</head>
+<body data-tab="home">
+<div id="splash" aria-label="温笑体测记分欢迎你">
+  <div class="sp-in">
+    <img src="splash.jpg" alt="操场" width="800" height="600">
+    <p class="sp-school">WENSMILE</p>
+    <p class="sp-hi">体测记分助手<br>欢迎使用</p>
+  </div>
+  <p class="sp-skip">轻触跳过</p>
+</div>
+<script>
+(function(){
+  var el=document.getElementById('splash');if(!el)return;
+  if(document.documentElement.className.indexOf('no-splash')>-1)return;
+  try{localStorage.setItem('pe_splash_day',new Date().toDateString());}catch(e){}
+  var t0=Date.now(),MIN=2000,MAX=4400,gone=false;
+  function hide(){if(gone)return;gone=true;el.className='out';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},320);}
+  function arm(){var w=Math.max(0,MIN-(Date.now()-t0));setTimeout(hide,w+260);}
+  if(document.readyState==='complete')arm();else window.addEventListener('load',arm);
+  setTimeout(hide,MAX);
+  el.addEventListener('click',hide);
+  el.addEventListener('touchstart',hide,{passive:true});
+})();
+</script>
+<div class="app">
+  <header class="hd">
+    <!-- 底部软件切换条已按需求去掉（节约屏幕空间），改由二维码/地址直接进对应软件 -->
+    <!-- 顶部第二栏：年级 + 班级，四个页面共用；只列本账号有权限的班级 -->
+    <div class="hd-row" id="hdClassRow">
+      <label class="pick-lb hd-lb">年级<select id="hdGradeSel" class="pick-sel" aria-label="选择年级"></select></label>
+      <label class="pick-lb hd-lb">班级<select id="hdClassSel" class="pick-sel" aria-label="选择班级"></select></label>
+    </div>
+    <div class="projbar" id="projBar"><select id="projSel" class="pick-sel" aria-label="选择测试项目"></select></div>
+    <div class="gseg" id="genderSeg"></div>
+    <div class="whoBar" id="whoBar" hidden></div>
+    <div class="cloudbar" id="cloudBar" hidden>云端</div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="home">首页</button>
+      <button class="tab" data-tab="test">测试</button>
+      <button class="tab" data-tab="rank">排名</button>
+      <button class="tab" data-tab="all">总表</button>
+      <button class="tab" data-tab="roster">名单</button>
+    </nav>
+  </header>
+
+  <div class="views">
+
+    <!-- ============ 首页：先选班级 ============ -->
+    <section class="view active" id="view-home">
+      <div class="card">
+        <div class="card-h"><span>选择班级或队伍</span><span class="sub" id="homeClassStat">共 1 个班</span></div>
+        <div class="selrow">
+          <label class="pick-lb">年级<select id="homeGradeSel" class="pick-sel"></select></label>
+          <label class="pick-lb">班级<select id="homeClassSel" class="pick-sel"></select></label>
+        </div>
+        <div class="selrow">
+          <label class="pick-lb">项目<select id="homeProjSel" class="pick-sel"></select></label>
+        </div>
+        <div class="btn-row quick-new-row" data-admin>
+          <button id="btnQuickNewClass" class="btn" type="button">＋ 新建班级（不限数量）</button>
+        </div>
+        <!-- 原来的年级按钮、班级按钮整排保留在 DOM 里但不显示，供旧逻辑兜底 -->
+        <div class="grade-row" id="homeGrades" style="display:none"></div>
+        <div class="cchips" id="homeClasses" style="display:none"></div>
+        <p class="tip">第一步用下拉选<b>年级</b>和<b>班级</b>，第二步选<b>项目</b>（50米、立定跳远…）；<b>两个下拉里都要显示出名字</b>，才能开始测试。切到测试、排名、总表、名单页时，顶部第二栏也有<b>年级／班级</b>下拉、下面还有同一个<b>项目</b>下拉，随时可以换。</p>
+      </div>
+
+      <div class="card" id="guideCard">
+        <div class="card-h"><span>操作指南</span><span class="sub">怎么测 · 怎么录</span></div>
+        <div class="guide" id="guideBox"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span>数据</span><span class="sub">两台手机合并用</span></div>
+        <div class="btn-row">
+          <button id="btnGoRoster" class="btn">名单 / 导入</button>
+          <button id="btnGoAll" class="btn">全班总表</button>
+        </div>
+        <div class="btn-row" style="margin-top:8px">
+          <button id="btnBackupHome" class="btn primary">备份全部数据</button>
+          <button id="btnRestoreHome" class="btn" data-admin>导入／合并备份</button>
+        </div>
+        <div class="btn-row" style="margin-top:8px" data-admin>
+          <button id="btnWipeAllHome" class="btn danger">一键清空全部名单、班级</button>
+        </div>
+        <p class="tip">两个人分开测时：一方点「备份全部数据」→ 发到微信 → 对方点「导入／合并备份」选<b>合并</b>，两份成绩并到一起。「名单」页有「从微信导入」和「备份并发送到微信」，手机上能直接调起微信发送。</p>
+        <p class="tip">清空前会<b>自动下载一份完整备份</b>，还要再输入「清空」确认；云端只打删除标记、不物理删，需要时可用备份恢复。</p>
+        <p class="ver" id="appVer">温笑体测记分 · <b>v1.0.10</b>（2026-11-20）· 班级和人数均不设上限 · 已适配 iPhone 13 与大名单 · 数据存在本机</p>
+      </div>
+    </section>
+
+    <!-- ============ 测试页 ============ -->
+    <section class="view" id="view-test">
+      <div class="card">
+        <div class="card-h"><span id="testTitle">50米</span><span class="sub" id="testTag">一班 · 男生 · 第 1 轮</span></div>
+        <div class="clock" id="clock">00:00.000</div>
+        <div class="hint" id="hint">按下面大按钮开始 · 冲过一人按一下，次数不限</div>
+        <div class="chips" id="chips"></div>
+        <div class="assign-bar" id="assignBar" hidden>
+          <input id="assignSearch" class="inp" type="text" placeholder="搜姓名或学号 · 找到后点名字" autocomplete="off">
+          <span class="assign-stat" id="assignStat"></span>
+        </div>
+        <div class="list-h"><span id="listTitle">名单</span><span class="sub" id="listSub"></span></div>
+
+        <div class="pick-wrap">
+          <div class="pick-list" id="pickList"></div>
+          <div class="pick-bar" id="pickBar">
+            <div class="pick-thumb" id="pickThumb"><i></i><i></i><i></i></div>
+          </div>
+        </div>
+
+        <div class="pick-foot">
+          <button class="linkbtn" id="btnShowDone">显示已记录</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="btn-row">
+          <button id="btnUndo" class="btn">撤销</button>
+          <button id="btnFinish" class="btn">结束本轮</button>
+        </div>
+        <p class="tip" id="testTip"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span>本轮成绩</span><span class="sub" id="liveCount">0 人</span></div>
+        <div class="tbl" id="liveRank"></div>
+      </div>
+
+      <div class="dock" id="dock">
+        <button id="btnStart" class="dock-main" type="button">
+          <span class="dm-num" id="dmNum">计时</span>
+          <span class="dm-sub" id="dmSub">按一下开始</span>
+        </button>
+        <button id="btnStop" class="dock-stop" type="button" disabled>停表</button>
+      </div>
+    </section>
+
+    <!-- ============ 排名页 ============ -->
+    <section class="view" id="view-rank">
+      <div class="card">
+        <div class="card-h"><span id="statTitle">最好成绩</span><span class="sub">男女分开统计</span></div>
+        <div class="stat2" id="statBox"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span id="rankTitle">本轮排名</span><span class="sub" id="rankSub"></span></div>
+        <div class="tbl" id="rankList"></div>
+      </div>
+      <div class="card">
+        <div class="btn-row">
+          <button id="btnExport" class="btn">导出这张表</button>
+          <button id="btnFinish2" class="btn primary">结束本轮</button>
+        </div>
+        <p class="tip" id="finishTip">这里排的是<b>当前右上角选中的那个项目</b>，换项目排名就跟着换。「得分」是这一项的国标单项分（满分 100），「总分」是固定 5 项标准分的平均（未测按 0 分）。「结束本轮」只是把这一轮封存、轮次 +1，成绩早存进每个学生名下了，不点也不会丢。</p>
+      </div>
+    </section>
+
+    <!-- ============ 总表 ============ -->
+    <section class="view" id="view-all">
+      <div class="card">
+        <div class="card-h"><span id="allTitle">全班总表</span><span class="sub" id="allSub"></span></div>
+        <div class="seg" id="allMode">
+          <button class="seg-btn active" data-mode="best">每人最好成绩</button>
+          <button class="seg-btn" data-mode="last">每人最近一次</button>
+        </div>
+        <div class="havg" id="allAvg"></div>
+        <div class="allwrap">
+          <table class="alltbl" id="allTbl"></table>
+        </div>
+        <div class="btn-row" style="margin-top:12px">
+          <button id="btnExportAll" class="btn primary">导出总表 CSV</button>
+          <button id="btnShareAll" class="btn">发送到微信</button>
+        </div>
+        <p class="tip">第一列是姓名，后面每个项目一列，成绩右边的<b>蓝色小数字</b>就是这一项的国标得分；右边倒数第二列是<b>体测总分</b>，最后一列是<b>评价</b>，这两列一直贴在屏幕右边，不用滑到头也看得到。表格上方的<b>全班总平均分</b>＝所有已测学生的总分平均。表格可以左右滑动，姓名列固定在左边。</p>
+        <p class="tip">每个项目都取<b>最好成绩</b>。评分按《国家学生体质健康标准（2014 年修订）》初中阶段单项评分表，按<b>年级</b>（初一/初二/初三）和性别取表，单项满分 100 分。<br><b>总分 = 固定 5 项标准分相加 ÷ 5</b>：男生（50米、1000米、立定跳远、坐位体前屈、引体向上），女生（50米、800米、立定跳远、坐位体前屈、仰卧起坐）；<b>没测的项目按 0 分算，分母始终是 5</b>，不会因为少测几项而变高。另外两项（男生 800米/仰卧起坐、女生 1000米/引体向上）成绩照常记，但不计分。<br><b>评价：</b>总分 <b>90 分及以上为优</b>、<b>80～90 为良</b>（不含 80）、<b>60～80 为合格</b>（不含 60）、<b>60 分以下为不合格</b>；一项都没测的显示「未测」。</p>
+      </div>
+    </section>
+
+    <!-- ============ 名单页 ============ -->
+    <section class="view" id="view-roster">
+      <div class="card">
+        <div class="card-h"><span>班级</span><span class="sub" id="classStat">共 1 个班</span></div>
+        <div class="selrow">
+          <span class="hd-now" id="rosterClassNow">—</span>
+          <button id="btnNewClass" class="btn small" type="button" data-admin>＋ 新建班级</button>
+        </div>
+        <!-- 顶部已经有年级 / 班级下拉，这里只留一个隐藏的兼容下拉，不再重复显示 -->
+        <select id="rosterClassSel" class="pick-sel" hidden aria-hidden="true"></select>
+        <div class="selrow" data-admin>
+          <label class="pick-lb">班级名称（改这里就是给班级改名）<input id="className" class="inp" maxlength="20" placeholder="班级名称"></label>
+        </div>
+        <div class="cchips" id="classChips" style="display:none"></div>
+        <div class="cls-new" id="classNewRow" hidden>
+          <input id="newClassName" class="inp" maxlength="20" placeholder="班级名，如 一班">
+          <button id="btnNewClassOk" class="btn primary">新建</button>
+          <button id="btnNewClassCancel" class="btn">取消</button>
+        </div>
+        <p class="tip">名单、成绩都按班级完全隔离。换班级用顶部的<b>年级 / 班级</b>下拉；在下面「班级名称」里改字，就是给当前班级改名。</p>
+        <p class="tip" id="rosterPermTip" hidden></p>
+        <div class="grade-row">
+          <span class="glabel">年级</span>
+          <div class="gseg" id="gradeSeg">
+            <button class="gbtn" data-g="1">初一</button>
+            <button class="gbtn" data-g="2">初二</button>
+            <button class="gbtn" data-g="3">初三</button>
+          </div>
+          <span class="gsub" id="gradeHint">国标评分按年级取表</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span>学生名单</span><span class="sub" id="rosterStat">共 0 人</span></div>
+        <div class="rule-line"><b>男、女分开统计</b> · 点一行展开各项目成绩</div>
+        <div class="tbl" id="rosterList"></div>
+        <div class="btn-row" style="margin-top:12px">
+          <button id="btnClearScores" class="btn danger">清空本班成绩</button>
+          <button id="btnUndoClear" class="btn" hidden>撤销清空</button>
+        </div>
+        <div class="btn-row" style="margin-top:8px" data-admin>
+          <button id="btnClear" class="btn danger">清空本班名单</button>
+          <button id="btnDelClass" class="btn danger">删除本班</button>
+        </div>
+        <div class="btn-row" style="margin-top:8px" data-admin>
+          <button id="btnWipeAll" class="btn danger">一键清空全部名单、班级</button>
+        </div>
+      </div>
+
+      <div class="card" data-admin>
+        <div class="card-h"><span>导入名单</span><span class="sub">全校名单统一在这里上传</span></div>
+        <div class="btn-row">
+          <label id="btnImport" class="btn primary lbl" for="fileInput">选择文件导入</label>
+          <button id="btnWechatIn" class="btn">从微信导入</button>
+          <button id="btnTemplate" class="btn">下载模板</button>
+        </div>
+        <p class="tip"><b>导入名单：</b>点上面「选择文件导入」。表头认「学号」「姓名」「性别」「班级」，支持 .xlsx / .xls / .csv；已有学生会合并，同名同姓保留已有成绩。<br>班级数和每班人数都没有上限，可自由建班、导入完整名单。</p>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" class="finput">
+        <div id="importMsg" class="msg"></div>
+      </div>
+
+      <div class="card" data-admin>
+        <div class="card-h"><span>手动添加</span><span class="sub">一个人也能加</span></div>
+        <div class="add-row">
+          <input id="newName" class="inp" maxlength="12" placeholder="学生姓名">
+          <select id="newGender" class="inp sel"><option value="男">男</option><option value="女">女</option></select>
+          <button id="btnAdd" class="btn primary">添加</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span>备份与合并</span><span class="sub">换手机 / 两个人合并</span></div>
+        <div class="btn-row">
+          <button id="btnBackup" class="btn primary">备份全部数据</button>
+          <button id="btnShareBk" class="btn">备份并发送到微信</button>
+          <button id="btnRestore" class="btn" data-admin>导入／合并备份</button>
+        </div>
+        <p class="tip">备份文件里含<b>全部学生、全部项目、每一次成绩</b>。换手机：旧手机点备份 → 文件发到微信 → 新手机选「从备份恢复」并选<b>替换</b>。两个人分别测了一半：都点备份，互相发文件，各自点「导入／合并备份」选<b>合并</b>，谁都不会覆盖谁。</p>
+        <input type="file" id="backupInput" accept=".json,application/json" hidden>
+        <div id="backupMsg" class="msg"></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- 确认 / 输入弹层 -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-mask" id="modalMask"></div>
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">提示</div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-btns">
+      <button class="btn" id="modalCancel">取消</button>
+      <button class="btn" id="modalAlt" hidden>这个成绩作废</button>
+      <button class="btn primary" id="modalOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js?v=110&sharecode=CHZSSC6P7N"></script>
+<script src="vendor/workbuddy-cloud-sdk.js?sharecode=CHZSSC6P7N"></script>
+<script src="local-auth.js?v=110&sharecode=CHZSSC6P7N"></script>
+<script src="projects.js?v=110&sharecode=CHZSSC6P7N"></script>
+<script src="quota.js?v=110&sharecode=CHZSSC6P7N"></script>
+<script>
+(function () {
+  var pending = null;
+  window.loadXlsxOnce = function () {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (pending) return pending;
+    pending = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'vendor/xlsx.full.min.js?sharecode=CHZSSC6P7N';
+      s.async = true;
+      s.onload = function () {
+        if (window.XLSX) resolve(window.XLSX);
+        else reject(new Error('XLSX unavailable'));
+      };
+      s.onerror = function () {
+        pending = null;
+        reject(new Error('XLSX load failed'));
+      };
+      document.head.appendChild(s);
+    });
+    return pending;
+  };
+  var warm = function () {
+    try { window.loadXlsxOnce().catch(function () {}); } catch (e) {}
+  };
+  if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 6000 });
+  else setTimeout(warm, 3000);
+})();
+</script>
+<script src="app.js?v=110&sharecode=CHZSSC6P7N"></script>
+<script>
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  var hadController = !!navigator.serviceWorker.controller;
+  if (hadController) {
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      try {
+        if (sessionStorage.getItem('pe_sw_reloaded_110') === '1') return;
+        sessionStorage.setItem('pe_sw_reloaded_110', '1');
+      } catch (e) {}
+      location.reload();
+    });
+  }
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js?v=110', { updateViaCache: 'none' }).then(function (reg) {
+      var update = function () { try { reg.update().catch(function () {}); } catch (e) {} };
+      update();
+      setInterval(update, 300000);
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) update(); });
+    }).catch(function () {});
+  });
+})();
+</script>
+</body>
+</html>

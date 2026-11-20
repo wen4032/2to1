@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>使用统计 · 温笑体测记分</title>
+<style>
+  :root { --bg:#0F172A; --card:#1E293B; --line:#334155; --txt:#E2E8F0; --mut:#94A3B8; --blue:#3B82F6; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:18px 14px 40px; background:var(--bg); color:var(--txt);
+         font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+  h1 { font-size:18px; margin:0 0 4px; }
+  .sub { color:var(--mut); font-size:12px; margin-bottom:16px; }
+  .gate { display:flex; gap:8px; margin-bottom:18px; }
+  .gate input { flex:1; min-width:0; padding:11px 12px; border-radius:10px; border:1px solid var(--line);
+                background:var(--card); color:var(--txt); font-size:14px; font-family:inherit; }
+  .gate button { padding:11px 16px; border-radius:10px; border:0; background:var(--blue); color:#fff;
+                 font-size:14px; font-family:inherit; cursor:pointer; }
+  .cards { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:18px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .card .n { font-size:26px; font-weight:700; line-height:1.1; }
+  .card .l { color:var(--mut); font-size:12px; margin-top:4px; }
+  .tblwrap { overflow:auto; border:1px solid var(--line); border-radius:12px; background:var(--card); }
+  table { border-collapse:collapse; width:100%; font-size:12.5px; min-width:640px; }
+  th,td { padding:9px 10px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th { color:var(--mut); font-weight:600; font-size:11.5px; }
+  tr:last-child td { border-bottom:0; }
+  .msg { color:var(--mut); font-size:13px; padding:14px 0; }
+  .err { color:#FCA5A5; }
+  .mono { font-family:ui-monospace,Menlo,Consolas,monospace; color:#93C5FD; }
+</style>
+</head>
+<body>
+<h1>温笑体测记分 · 使用统计</h1>
+<div class="sub">这里只有随机设备码和数字，没有任何学生姓名或成绩。</div>
+
+<div class="gate">
+  <input id="key" type="password" placeholder="统计密钥" autocomplete="off">
+  <button id="go">查看</button>
+</div>
+
+<div class="cards">
+  <div class="card"><div class="n" id="nTotal">–</div><div class="l">累计设备数</div></div>
+  <div class="card"><div class="n" id="nToday">–</div><div class="l">今日活跃</div></div>
+  <div class="card"><div class="n" id="nWeek">–</div><div class="l">近 7 天活跃</div></div>
+  <div class="card"><div class="n" id="nStu">–</div><div class="l">各设备人数合计</div></div>
+</div>
+
+<div class="msg" id="msg">输入密钥后点「查看」。</div>
+<div class="tblwrap" id="wrap" hidden>
+  <table>
+    <thead><tr>
+      <th>设备码</th><th>首次打开</th><th>最近打开</th><th>打开次数</th><th>人数</th><th>班数</th><th>设备</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+
+<script src="config.js?sharecode=CHZSSC6P7N"></script>
+<script src="vendor/workbuddy-cloud-sdk.js?sharecode=CHZSSC6P7N"></script>
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var cloud = null;
+
+  function client() {
+    if (cloud) return cloud;
+    cloud = window.WorkBuddyCloud.createWorkBuddyCloud(window.WB_CLOUD_CONF);
+    return cloud;
+  }
+
+  function fmt(ts) {
+    if (!ts) return '—';
+    var d = new Date(ts);
+    if (isNaN(d.getTime())) return '—';
+    var p = function (n) { return n < 10 ? '0' + n : '' + n; };
+    return (d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  function shortUA(ua) {
+    ua = String(ua || '');
+    if (/iPhone/.test(ua)) return 'iPhone';
+    if (/iPad/.test(ua)) return 'iPad';
+    if (/Android/.test(ua)) {
+      var m = ua.match(/Android[^;]*;\s*([^)]+?)(?:\s+Build|\))/);
+      return 'Android' + (m ? ' · ' + m[1].slice(0, 22) : '');
+    }
+    if (/Windows/.test(ua)) return 'Windows';
+    if (/Macintosh/.test(ua)) return 'Mac';
+    return '其他';
+  }
+
+  function load(key) {
+    if (!key) { $('msg').textContent = '请先输入密钥。'; return; }
+    $('msg').className = 'msg';
+    $('msg').textContent = '正在读取…';
+    $('wrap').hidden = true;
+
+    var p;
+    try {
+      p = client().database.rpc('ws_stats', { p_key: key });
+    } catch (e) {
+      $('msg').className = 'msg err';
+      $('msg').textContent = '云端组件加载失败，请刷新重试。';
+      return;
+    }
+
+    Promise.resolve(p).then(function (r) {
+      var d = (r && r.data !== undefined && r.data !== null) ? r.data : r;
+      if (!d || !d.ok) {
+        $('msg').className = 'msg err';
+        $('msg').textContent = '密钥不对，或没有权限。';
+        return;
+      }
+      $('nTotal').textContent = d.total || 0;
+      $('nToday').textContent = d.today || 0;
+      $('nWeek').textContent = d.week || 0;
+      $('nStu').textContent = d.students || 0;
+
+      var list = d.list || [];
+      if (!list.length) {
+        $('msg').textContent = '还没有任何设备上报（可能是刚发布，还没人打开）。';
+        return;
+      }
+      $('msg').textContent = '共 ' + list.length + ' 条记录';
+      $('rows').innerHTML = list.map(function (x) {
+        return '<tr>' +
+          '<td class="mono">' + String(x.did || '').slice(0, 12) + '…</td>' +
+          '<td>' + fmt(x.first_at) + '</td>' +
+          '<td>' + fmt(x.last_at) + '</td>' +
+          '<td>' + (x.opens || 0) + '</td>' +
+          '<td>' + (x.students_max || 0) + '</td>' +
+          '<td>' + (x.classes_max || 0) + '</td>' +
+          '<td>' + shortUA(x.ua) + '</td>' +
+          '</tr>';
+      }).join('');
+      $('wrap').hidden = false;
+    }).catch(function () {
+      $('msg').className = 'msg err';
+      $('msg').textContent = '连不上云端，请检查网络后重试。';
+    });
+  }
+
+  var k = '';
+  try {
+    var m = location.search.match(/[?&]k=([^&]+)/);
+    if (m) k = decodeURIComponent(m[1]);
+  } catch (e) {}
+  if (k) { $('key').value = k; load(k); }
+
+  $('go').addEventListener('click', function () { load($('key').value.trim()); });
+  $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') load($('key').value.trim()); });
+})();
+</script>
+</body>
+</html>

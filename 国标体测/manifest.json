@@ -1,0 +1,17 @@
+{
+  "name": "温笑体测记分",
+  "short_name": "温笑体测",
+  "description": "体育课体测记分：50米/800米/1000米、跳远、体前屈、引体、仰卧起坐，按国家学生体质健康标准自动评分、算总分与等级。数据只存在本机。",
+  "start_url": "/?sharecode=CHZSSC6P7N",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F9FC",
+  "theme_color": "#1E40AF",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icon-192.png?sharecode=CHZSSC6P7N", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png?sharecode=CHZSSC6P7N", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png?sharecode=CHZSSC6P7N", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

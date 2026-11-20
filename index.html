@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1E40AF">
+<title>温笑体育课堂</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+body{background:#EEF1F5;color:#111827;display:flex;justify-content:center;min-height:100vh;min-height:100dvh}
+.shell{width:100%;max-width:520px;min-height:100vh;min-height:100dvh;padding:calc(28px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,#F8FAFF 0%,#EEF1F5 55%,#EEF1F5 100%)}
+.brand{text-align:center;margin:16px 0 24px}
+.brand .dot{display:inline-flex;width:54px;height:54px;border-radius:16px;align-items:center;justify-content:center;background:#1D4ED8;color:#fff;font-size:24px;font-weight:700;box-shadow:0 10px 24px rgba(29,78,216,.22)}
+.brand h1{font-size:25px;line-height:1.3;margin:14px 0 6px;letter-spacing:.02em}
+.brand p{font-size:13px;line-height:1.6;color:#6B7280;margin:0}
+.switch-title{display:flex;align-items:baseline;justify-content:space-between;margin:18px 2px 10px;font-size:14px;font-weight:600}
+.switch-title span{font-size:11.5px;font-weight:400;color:#8A94A6}
+.apps{display:grid;gap:12px}
+.app-card{display:flex;align-items:center;gap:14px;padding:18px;border:1px solid #DDE5F2;border-radius:18px;background:#fff;text-decoration:none;color:#111827;box-shadow:0 6px 18px rgba(16,24,40,.05);touch-action:manipulation}
+.app-card:active{transform:translateY(1px) scale(.995)}
+.app-icon{flex:0 0 54px;width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700}
+.app-icon.blue{background:#E8EFFD;color:#1D4ED8}
+.app-icon.green{background:#E8F8EF;color:#15803D}
+.app-main{flex:1;min-width:0}
+.app-main b{display:block;font-size:18px;line-height:1.3;margin-bottom:4px}
+.app-main i{display:block;font-style:normal;font-size:12.5px;line-height:1.5;color:#6B7280}
+.app-arrow{color:#A5B0C1;font-size:22px}
+.note{margin:18px 4px 0;padding:12px 14px;border-radius:12px;background:#F8FAFC;border:1px solid #E7ECF3;font-size:12.5px;line-height:1.7;color:#5B6577}
+.note b{color:#334155}
+@media (min-width:420px){.shell{padding-left:22px;padding-right:22px}.app-card{padding:20px}.app-main b{font-size:19px}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="brand">
+    <div class="dot">体</div>
+    <h1>温笑体育课堂</h1>
+    <p>一个入口，两套独立记录工具</p>
+  </div>
+
+  <div class="switch-title"><b>选择软件</b><span>切换后数据互不影响</span></div>
+  <div class="apps">
+    <a class="app-card" href="国标体测/index.html">
+      <span class="app-icon blue">国</span>
+      <span class="app-main"><b>国标体测</b><i>50米、800/1000米、跳远、体前屈、引体、仰卧起坐 · 国标评分</i></span>
+      <span class="app-arrow">›</span>
+    </a>
+    <a class="app-card" href="田径队/index.html">
+      <span class="app-icon green">田</span>
+      <span class="app-main"><b>田径队</b><i>50/60/100/200/400/800/1500米、立定跳远、引体向上、平板支撑</i></span>
+      <span class="app-arrow">›</span>
+    </a>
+  </div>
+
+  <p class="note"><b>为什么没做成一个程序？</b><br>两套软件的名单、成绩和评分规则不同。现在入口合并，但数据各自保存，切换时不会把国标体测的成绩带进田径队，也不会互相覆盖。本页是统一入口，田径队首页也留有“软件切换”和“返回总入口”。</p>
+</main>
+</body>
+</html>

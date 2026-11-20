@@ -1,0 +1,18 @@
+{
+  "id": "wensmile-track-team",
+  "name": "温笑田径队记录",
+  "short_name": "田径队记录",
+  "description": "田径队训练记录：50米、60米、100米、200米、400米、800米、1500米、立定跳远、引体向上、平板支撑。与国标体测独立保存数据。",
+  "start_url": "./index.html?sharecode=CHZSSC6P7N",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F9FC",
+  "theme_color": "#1E40AF",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icon-192.png?sharecode=CHZSSC6P7N", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png?sharecode=CHZSSC6P7N", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png?sharecode=CHZSSC6P7N", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
